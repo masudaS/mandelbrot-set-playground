@@ -1,0 +1,26 @@
+<%
+const Constants = require("./constants.json")
+const { Canvas, Inputs, Message } = Constants
+console.log(Inputs)
+%>
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Mandelbort Set Playground</title>
+  </head>
+  <body>
+    <div id="app">
+      <canvas
+        id="<%= Canvas.ID %>"
+        width="<%= Canvas.Width %>"
+        height="<%= Canvas.Height %>">
+      </canvas>
+      <br/>
+      中心のx座標:<input id="<%= Inputs.CenterX.ID %>" type="number" value="0"></input>
+      中心のy座標:<input id="<%= Inputs.CenterY.ID %>" type="number" value="0"></input>
+      拡大率:<input id="<%= Inputs.ExpansionRate.ID %>" type="number" value="400"></input> 
+      <button id="<%= Inputs.Reload.ID %>" >更新</button>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "Canvas": {
+    "ID": "canvas-area",
+    "Width": 800,
+    "Height": 800
+  },
+  "Inputs": {
+    "CenterX": { "ID": "CenterX" },
+    "CenterY": { "ID": "CenterY" },
+    "ExpansionRate": { "ID": "ExpansionRate" },
+    "Reload": { "ID": "Relaod" }
+  }
+}
