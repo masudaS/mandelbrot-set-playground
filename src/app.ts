@@ -1,5 +1,6 @@
 import Constants from "./constants.json"
 
+const LOOP_MAX = 1000
 type Point = { x: number, y: number }
 
 class Complex {
@@ -25,6 +26,17 @@ const isInnerMBSet = (c: Complex): boolean => {
     if (z.abs() > 2) { return false }
   }
   return true
+}
+
+const calculateDivergeSpeed = (c: Complex): number => {
+  if (c.abs() >= 2) { return LOOP_MAX }
+
+  let z = new Complex(0, 0)
+  for (let i = 1; i < LOOP_MAX; i++) {
+    z = MBtransform(z, c)
+    if (z.abs() > 2) { return LOOP_MAX - i }
+  }
+  return 0
 }
 
 class AffineTransformer {
@@ -65,10 +77,29 @@ const renderMB = (context: CanvasRenderingContext2D, centerPoint: Point, expansi
 
   for (let x = min_x; x < max_x; x += delta_x) {    
     for (let y = min_y; y < max_y; y += delta_y) {
-      if (isInnerMBSet(new Complex(x, y))) {
-        const { x: _x, y: _y } = canvasTF.transform({ x, y })
-        context.fillRect(_x, _y, 1, 1)
+      const divergeSpeed = calculateDivergeSpeed(new Complex(x, y));
+
+      switch (true) {
+        case divergeSpeed === 0:
+          context.fillStyle = `rgb(0, 0, 0)`; break;
+        case divergeSpeed <= LOOP_MAX * 0.5:      //  1/2
+          context.fillStyle = `rgb(255, 255, 255)`; break;
+        case divergeSpeed <= LOOP_MAX * 0.75:     //  3/4
+          context.fillStyle = `rgb(100, 250, 200)`; break;
+        case divergeSpeed <= LOOP_MAX * 0.875:    //  7/8
+          context.fillStyle = `rgb(80, 150, 150)`; break;
+        case divergeSpeed <= LOOP_MAX * 0.9375:   // 15/16
+          context.fillStyle = `rgb(50, 150, 230)`; break;
+        case divergeSpeed <= LOOP_MAX * 0.96875:  // 31/32
+          context.fillStyle = `rgb(0, 130, 255)`; break;
+        case divergeSpeed <= LOOP_MAX - 1:
+          context.fillStyle = `rgb(0, 100, 255)`; break;
+        default:
+          context.fillStyle = `rgb(0, 0, 255)`; break;
       }
+
+      const { x: _x, y: _y } = canvasTF.transform({ x, y })
+      context.fillRect(_x, _y, 1, 1)
     }
   }
 }
@@ -78,7 +109,7 @@ function onClickReload() {
   const center_y = Number.parseFloat((document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value)
   const expansionRate = Number.parseFloat((document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value)
 
-  const canvas = document.getElementById(Constants.Canvas.ID) as any
+  const canvas = document.getElementById(Constants.Canvas.ID) as HTMLCanvasElement
 
   renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x: center_x, y: center_y }, expansionRate)
 }
@@ -86,10 +117,10 @@ function onClickReload() {
 function main() {
   document.getElementById(Constants.Inputs.Reload.ID)!.onclick = onClickReload
 
-  const expansionRate = 400
-  const canvas = document.getElementById(Constants.Canvas.ID) as any
+  const expansionRate = 15000
+  const canvas = document.getElementById(Constants.Canvas.ID) as HTMLCanvasElement
 
-  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x: 0, y: 0 }, expansionRate)
+  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x: -0.7, y: 0.3 }, expansionRate)
 } 
 
 main();
