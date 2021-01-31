@@ -109,18 +109,38 @@ function onClickReload() {
   const center_y = Number.parseFloat((document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value)
   const expansionRate = Number.parseFloat((document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value)
 
-  const canvas = document.getElementById(Constants.Canvas.ID) as HTMLCanvasElement
+  window.location.hash = `center_x=${center_x}&center_y=${center_y}&expansionRate=${expansionRate}`
+}
 
-  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x: center_x, y: center_y }, expansionRate)
+const pickParams = () => {
+  const hash = window.location.hash.slice(1);
+  const [_center_x, _center_y, _expansionRate] = hash.split("&");
+  
+  const center_x = Number.parseFloat(_center_x.split("=")[1])
+  const center_y = Number.parseFloat(_center_y.split("=")[1])
+  const expansionRate = Number.parseFloat(_expansionRate.split("=")[1])
+
+  return { center_x, center_y, expansionRate }
 }
 
 function main() {
   document.getElementById(Constants.Inputs.Reload.ID)!.onclick = onClickReload
+  window.onhashchange = main
 
-  const expansionRate = 15000
+  const { center_x, center_y, expansionRate } = window.location.hash?.length ? pickParams()
+    : { center_x: 0, center_y: 0, expansionRate: 400 };
+
+  (document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value = center_x.toString();
+  (document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value = center_y.toString();
+  (document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value = expansionRate.toString();
+  
   const canvas = document.getElementById(Constants.Canvas.ID) as HTMLCanvasElement
 
-  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x: -0.7, y: 0.3 }, expansionRate)
+  renderMB(
+    canvas.getContext("2d") as CanvasRenderingContext2D,
+    { x: center_x , y: center_y },
+    expansionRate,
+  );
 } 
 
 main();
