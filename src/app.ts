@@ -64,21 +64,11 @@ const renderMB = (context: CanvasRenderingContext2D, centerPoint: Point, expansi
     [[expansionRate, 0, CanvasWidth/2 - expansionRate * centerPoint.x], [0, -expansionRate, CanvasHeight/2 + expansionRate * centerPoint.y]]
   )
 
-  const { x: edge_x1, y: edge_y1 } = canvasTF.inverse({ x: 0, y: 0 })
-  const { x: edge_x2, y: edge_y2 } = canvasTF.inverse({ x: CanvasWidth, y: CanvasHeight })
-
-  const max_x = Math.max(edge_x1, edge_x2)
-  const max_y = Math.max(edge_y1, edge_y2)
-  const min_x = Math.min(edge_x1, edge_x2)
-  const min_y = Math.min(edge_y1, edge_y2)
-
-  const delta_x = (max_x - min_x) / CanvasWidth
-  const delta_y = (max_y - min_y) / CanvasHeight
-
-  for (let x = min_x; x < max_x; x += delta_x) {    
-    for (let y = min_y; y < max_y; y += delta_y) {
-      const divergeSpeed = calculateDivergeSpeed(new Complex(x, y));
-
+  for (let canv_x = 0; canv_x < CanvasWidth; canv_x++) {
+    for (let canv_y = 0; canv_y < CanvasWidth; canv_y++) {
+      const { x:re, y:im } = canvasTF.inverse({ x: canv_x, y: canv_y })
+      const divergeSpeed = calculateDivergeSpeed(new Complex(re, im))
+      
       switch (true) {
         case divergeSpeed === 0:
           context.fillStyle = `rgb(0, 0, 0)`; break;
@@ -98,8 +88,7 @@ const renderMB = (context: CanvasRenderingContext2D, centerPoint: Point, expansi
           context.fillStyle = `rgb(0, 0, 255)`; break;
       }
 
-      const { x: _x, y: _y } = canvasTF.transform({ x, y })
-      context.fillRect(_x, _y, 1, 1)
+      context.fillRect(canv_x, canv_y, 1, 1)
     }
   }
 }
