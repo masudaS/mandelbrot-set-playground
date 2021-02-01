@@ -8,6 +8,7 @@
     "CenterX": { "ID": "CenterX" },
     "CenterY": { "ID": "CenterY" },
     "ExpansionRate": { "ID": "ExpansionRate" },
-    "Reload": { "ID": "Relaod" }
+    "Reload": { "ID": "Relaod" },
+    "Download": { "ID": "Download" }
   }
 }

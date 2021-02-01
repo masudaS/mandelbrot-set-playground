@@ -101,6 +101,21 @@ function onClickReload() {
   window.location.hash = `center_x=${center_x}&center_y=${center_y}&expansionRate=${expansionRate}`
 }
 
+function onClickDownload(ev: Event) {
+  const canvas = document.getElementById(Constants.Canvas.ID)! as HTMLCanvasElement;
+  canvas.toBlob((blob) => {
+    const { center_x, center_y, expansionRate } = pickParams();
+    const url = URL.createObjectURL(blob);
+    const atag = document.createElement("a");
+    document.body.appendChild(atag)
+    atag.download = `mandelbrot_${center_x}_${center_y}_${expansionRate}`;
+    atag.href = url;
+    atag.click();
+    atag.remove();
+    setTimeout(() => { URL.revokeObjectURL(url) }, 100)
+  }, "image/png")
+}
+
 const pickParams = () => {
   const hash = window.location.hash.slice(1);
   const [_center_x, _center_y, _expansionRate] = hash.split("&");
@@ -114,11 +129,16 @@ const pickParams = () => {
 
 function main() {
   document.getElementById(Constants.Inputs.Reload.ID)!.onclick = onClickReload
-  window.onhashchange = main
+  document.getElementById(Constants.Inputs.Download.ID)!.onclick = onClickDownload
 
-  const { center_x, center_y, expansionRate } = window.location.hash?.length ? pickParams()
-    : { center_x: 0, center_y: 0, expansionRate: 400 };
+  const hasHash = Boolean(window.location.hash?.length);
+  const { center_x, center_y, expansionRate } = hasHash ? pickParams() : { center_x: 0, center_y: 0, expansionRate: 400 };
 
+  if (!hasHash) {
+    window.location.hash = `center_x=${center_x}&center_y=${center_y}&expansionRate=${expansionRate}`;
+  }
+
+  window.onhashchange = main;
   (document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value = center_x.toString();
   (document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value = center_y.toString();
   (document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value = expansionRate.toString();
