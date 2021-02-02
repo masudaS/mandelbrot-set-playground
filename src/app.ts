@@ -94,21 +94,22 @@ const renderMB = (context: CanvasRenderingContext2D, centerPoint: Point, expansi
 }
 
 function onClickReload() {
-  const center_x = Number.parseFloat((document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value)
-  const center_y = Number.parseFloat((document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value)
+  const x = Number.parseFloat((document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value)
+  const y = Number.parseFloat((document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value)
   const expansionRate = Number.parseFloat((document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value)
 
-  window.location.hash = `center_x=${center_x}&center_y=${center_y}&expansionRate=${expansionRate}`
+  window.history.pushState(undefined, "", `?x=${x}&y=${y}&expansionRate=${expansionRate}`);
+  main(false);
 }
 
 function onClickDownload(ev: Event) {
   const canvas = document.getElementById(Constants.Canvas.ID)! as HTMLCanvasElement;
   canvas.toBlob((blob) => {
-    const { center_x, center_y, expansionRate } = pickParams();
+    const { x, y, expansionRate } = pickParams();
     const url = URL.createObjectURL(blob);
     const atag = document.createElement("a");
     document.body.appendChild(atag)
-    atag.download = `mandelbrot_${center_x}_${center_y}_${expansionRate}.png`;
+    atag.download = `mandelbrot_${x}_${y}_${expansionRate}.png`;
     atag.href = url;
     atag.click();
     atag.remove();
@@ -116,40 +117,31 @@ function onClickDownload(ev: Event) {
   }, "image/png")
 }
 
-const pickParams = () => {
-  const hash = window.location.hash.slice(1);
-  const [_center_x, _center_y, _expansionRate] = hash.split("&");
-  
-  const center_x = Number.parseFloat(_center_x.split("=")[1])
-  const center_y = Number.parseFloat(_center_y.split("=")[1])
-  const expansionRate = Number.parseFloat(_expansionRate.split("=")[1])
-
-  return { center_x, center_y, expansionRate }
+function pickParams(): { x: number, y: number, expansionRate: number} {
+  const params = new URL(document.location.toString()).searchParams;
+  const x = Number.parseFloat(params.get("x") ?? "0");
+  const y = Number.parseFloat(params.get("y") ?? "0");
+  const expansionRate = Number.parseFloat(params.get("expansionRate") ?? "400");
+  return { x, y, expansionRate }
 }
 
-function main() {
-  document.getElementById(Constants.Inputs.Reload.ID)!.onclick = onClickReload
-  document.getElementById(Constants.Inputs.Download.ID)!.onclick = onClickDownload
-
-  const hasHash = Boolean(window.location.hash?.length);
-  const { center_x, center_y, expansionRate } = hasHash ? pickParams() : { center_x: 0, center_y: 0, expansionRate: 400 };
-
-  if (!hasHash) {
-    window.location.hash = `center_x=${center_x}&center_y=${center_y}&expansionRate=${expansionRate}`;
+function main(initialize: boolean) {
+  if (initialize) {
+    document.getElementById(Constants.Inputs.Reload.ID)!.onclick = onClickReload;
+    document.getElementById(Constants.Inputs.Download.ID)!.onclick = onClickDownload;
+    window.onpopstate = () => main(false);
   }
+  
+  const { x, y, expansionRate } = pickParams();
+  console.log(x, y, expansionRate);
 
-  window.onhashchange = main;
-  (document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value = center_x.toString();
-  (document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value = center_y.toString();
+  (document.getElementById(Constants.Inputs.CenterX.ID) as HTMLInputElement).value = x.toString();
+  (document.getElementById(Constants.Inputs.CenterY.ID) as HTMLInputElement).value = y.toString();
   (document.getElementById(Constants.Inputs.ExpansionRate.ID) as HTMLInputElement).value = expansionRate.toString();
   
   const canvas = document.getElementById(Constants.Canvas.ID) as HTMLCanvasElement
 
-  renderMB(
-    canvas.getContext("2d") as CanvasRenderingContext2D,
-    { x: center_x , y: center_y },
-    expansionRate,
-  );
+  renderMB(canvas.getContext("2d") as CanvasRenderingContext2D, { x, y }, expansionRate);
 } 
 
-main();
+main(true);
