@@ -108,7 +108,7 @@ function onClickDownload(ev: Event) {
     const url = URL.createObjectURL(blob);
     const atag = document.createElement("a");
     document.body.appendChild(atag)
-    atag.download = `mandelbrot_${center_x}_${center_y}_${expansionRate}`;
+    atag.download = `mandelbrot_${center_x}_${center_y}_${expansionRate}.png`;
     atag.href = url;
     atag.click();
     atag.remove();
